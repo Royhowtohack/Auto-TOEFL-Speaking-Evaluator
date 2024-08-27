@@ -74,3 +74,29 @@ This script calculates the total raw scores and TOEFL scaled scores based on the
 **输出:**
 - 包含学生姓名、TOEFL 分数和总原始分数的 CSV 文件。
 - 包含相同数据的 Excel 文件。
+
+---
+
+### **Part 4: Shadowing Audio Generation**  
+**功能说明 - 第四部分：跟读音频生成**
+
+This script generates personalized shadowing audios for students based on their modified responses from the TOEFL speaking tasks. The script reads the student names, genders, and modified responses from JSON files. It then uses OpenAI's Text-to-Speech API to create audio files, with male students receiving an "Alloy" voice and female students receiving a "Nova" voice. The audio files are saved in a designated folder for each task.
+
+该脚本根据学生在托福口语任务中的修改后的回答生成个性化的跟读音频。脚本从JSON文件中读取学生姓名、性别和修改后的回答，然后使用OpenAI的语音合成API创建音频文件，其中男学生使用“Alloy”声音，女学生使用“Nova”声音。音频文件会被保存在每个任务指定的文件夹中。
+
+**Input:**  
+- JSON file with task responses (e.g., `task1_responses.json`)  
+- JSON file with student names and genders (e.g., `student_gender_map.json`)
+
+**输入:**  
+- 含有任务回复的JSON文件（如 `task1_responses.json`）  
+- 含有学生姓名和性别的JSON文件（如 `student_gender_map.json`）
+
+**Output:**  
+- Audio files for each student's modified response saved in folders like `task1_modified_audios/` with filenames in the format `task1_{student_name}_shadowing.wav`.
+
+**输出:**  
+- 每个学生修改后的回答的音频文件保存在类似 `task1_modified_audios/` 的文件夹中，文件名格式为 `task1_{student_name}_shadowing.wav`。
+
+---
+
