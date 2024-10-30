@@ -5,18 +5,39 @@ import pandas as pd
 import openpyxl
 from redlines import Redlines
 
+def clean_text(text):
+    """
+    Strips leading/trailing whitespace and normalizes quotes.
+    """
+    text = text.strip()  # Remove leading/trailing whitespace
+    text = re.sub(r'^"+|"+$', '', text)  # Remove leading/trailing double quotes
+    return text
+
 def highlight_differences(original, revised):
-    differ = Redlines(original, revised)
+    """
+    Highlights differences between the original and revised texts using Redlines.
+    """
+    # Clean both original and revised texts
+    original_clean = clean_text(original)
+    revised_clean = clean_text(revised)
+    
+    # Perform the Redlines comparison
+    differ = Redlines(original_clean, revised_clean)
+    
+    # Return the output with highlighted differences
     return differ.output_markdown
 
 def process_responses(task_number):
+    """
+    Processes the responses for the given task number.
+    """
     # Load the JSON responses
     json_file = f"task{task_number}_responses.json"
     if not os.path.exists(json_file):
         print(f"JSON file {json_file} not found.")
         return
     
-    with open(json_file, 'r') as f:
+    with open(json_file, 'r', encoding='utf-8') as f:
         responses = json.load(f)
 
     # Create an empty DataFrame for storing results
@@ -52,6 +73,10 @@ def process_responses(task_number):
             highlighted_revised_text = highlight_differences(original_response, revised_text)
             highlighted_changes.append((student_name, highlighted_revised_text))
 
+    if df.empty:
+        print(f"No valid responses found in {json_file}.")
+        return
+
     # Save results to a separate Excel file for each task
     excel_filename = f'StudentFeedback_Task{task_number}.xlsx'
     with pd.ExcelWriter(excel_filename, engine='openpyxl') as writer:
@@ -66,7 +91,7 @@ def process_responses(task_number):
                 cell.alignment = wrap_alignment
 
         # Set row height for rows with data
-        for idx, row in enumerate(worksheet, start=1):
+        for idx, row in enumerate(worksheet.iter_rows(), start=1):
             if idx > 1:  # assuming the first row is header
                 worksheet.row_dimensions[idx].height = 60  # adjust this value based on your needs
 
@@ -77,7 +102,7 @@ def process_responses(task_number):
 
     # Save highlighted changes to a separate HTML file
     highlighted_filename = f'HighlightedChanges_Task{task_number}.html'
-    with open(highlighted_filename, 'w') as file:
+    with open(highlighted_filename, 'w', encoding='utf-8') as file:
         file.write("<html><body>")
         for student_name, highlighted_text in highlighted_changes:
             file.write(f"<h2>{student_name}</h2>")
@@ -86,15 +111,22 @@ def process_responses(task_number):
         file.write("</body></html>")
     
     print(f"\nHighlighted changes saved to {highlighted_filename}.")
-    print("Processing complete.")
+    print("Processing complete.\n")
 
 def main():
-    task_number = input("Select the task number to process responses (1, 2, 3, or 4), or type any other input to quit:").strip()
-    if task_number not in ['1', '2', '3', '4']:
-        print("Invalid input. Exiting the program.")
-        return
+    """
+    Main function to run the Feedback Formatter in a loop.
+    """
+    print("=== Feedback Formatter ===")
+    while True:
+        print("Select the task number to process responses (1, 2, 3, or 4), or type any other input to quit:")
+        task_number = input().strip()
 
-    process_responses(task_number)
+        if task_number not in ['1', '2', '3', '4']:
+            print("Exiting the program.")
+            break
+
+        process_responses(task_number)
 
 if __name__ == "__main__":
     main()
